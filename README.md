@@ -1,25 +1,29 @@
 
 # HumanKapital
 
-<!-- badges: start -->
-<!-- badges: end -->
-
-The goal of HumanKapital is to ...
+HumanKapital enthält Unterichtsmaterial für den TU Kurs im Sommersemester 2021.
 
 ## Installation
 
-You can install the released version of HumanKapital from [CRAN](https://CRAN.R-project.org) with:
+Die Installation aus GitHub erfolgt via devtools. HumanKapital benötigt außerdem das Paket learnr und in Windows rtools (https://cran.r-project.org/bin/windows/Rtools/).
 
 ``` r
-install.packages("HumanKapital")
+install.packages("devtools")
+install.packages("learnr")
+
+devtools::install_github("lkuld/HumanKapital")
 ```
 
-## Example
+## Beispiel
 
-This is a basic example which shows you how to solve a common problem:
 
 ``` r
 library(HumanKapital)
-## basic example code
+
+## um die verfuegbaren Tutorien zu sehen
+available_tutorials("HumanKapital")
+
+## um ein Tutorium "Beispiel" zu beginnen
+run_tutorials("Beispiel", "HumanKapital")
 ```
 

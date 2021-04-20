@@ -1,0 +1,221 @@
+---
+title: "Teil 1: Grundlagen"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+##  R als Taschenrechner
+
+### Rechnen
+
+*Zunächst machen wir uns mit den Grundfunktionen von R und dieser Umgebung vertraut. In den Kästchen kannst du beliebigen R code schreiben und dann ausführen. Es verhält sich also wie dein R-Skript (oben links in RStudio). Der Output unten verhält sich dazu wie deine Konsole (unten links in RStudio).*
+
+Schreibe in das folgende Feld beliebige Rechnungen, z.B. `2+2` und klicke danach auf 'Run Code'. Falls du den Kasten neu beginnen möchtest, klicke auf Start Over. Was passiert, wenn du zwei Rechnungen in dieselbe Zeile schreibst oder untereinander?
+
+```{r herumrechnen, exercise=TRUE}
+
+```
+
+Was ist $5^{3+4}$? Wenn du einen Hinweis möchtest, kannst du auf Hint klicken. 
+
+```{r hoch, exercise=TRUE}
+
+```
+
+```{r hoch-hint}
+5^(3+4)
+```
+
+
+Was ist die Wurzel von 289? Wenn du die Loesung möchtest, kannst du auf Solution klicken. 
+
+```{r wurzel, exercise=TRUE}
+
+```
+
+```{r wurzel-solution}
+sqrt(x)
+```
+
+
+
+### Ergebnisse speichern
+
+Speicher die Zahl 2 unter dem Namen x1. Das geht per Pfeil oder per Gleichheitszeichen, also `x1 <- 2` oder `x1 = 2`. Addiere drei zu  x1 in der nächsten Zeile und speicher das Ergebnis als y. Was ist y?
+
+
+```{r speicher, exercise=TRUE}
+
+```
+
+```{r speicher-solution}
+  x1 <- 2
+  y <- x1 + 3
+  y
+```
+
+
+## Objekte und Funktionen
+
+* “To understand computations in R, two slogans are helpful: Everything that exists is an object. Everything that happens is a function call.”
+
+    „Um Berechnungen in R zu verstehen sind zwei Sätze hilfreich: Alles, was existiert, ist ein Objekt. Alles, was passiert, ist ein Funktionsaufruf.“
+
+– John M. Chambers, nach https://de.wikipedia.org/wiki/R_(Programmiersprache)*
+
+Wir hatten oben bereits zwei neue Objekte definiert: x1 und y. Führe zunächst den Code unten aus, wie gegeben. x1 und y werden dann zwar definiert, aber nicht ausgegeben. Um die Werte auszugeben, schreibe den Variablennamen in eine leere Zeile darunter und führe dann den Code aus.
+
+```{r Objekt, exercise=TRUE, exercise.preval=TRUE}
+x1 <- 2
+y <- x1 + 3
+```
+
+```{r Objekt-solution}
+x1 <- 2
+y <- x1 + 3
+
+x1
+y
+```
+
+### Funktionen
+
+Wir wollen nun eine neue Art von Objekt speichern: eine Funktion. Funktionen nehmen einen input und ordnen ihm einen output zu. Die folgende ist ein Beispiel fuer eine lineare Fuktion: $f(x)=4x+3$. Um Code über mehr als eine Zeile zusammen ausführen zu können, nutzen wir geschweifte Klammern `{}`.
+
+```{r FunktionBsp, exercise=TRUE, exercise.preval=TRUE}
+LineareFunktion <- function(x){
+  4*x + 3
+}
+
+LineareFunktion(2)
+LineareFunktion(20)
+```
+
+
+Unsere eigene Funktion soll uns für einen beliebigen Input $x_1$ den Wert $x_1+3$ ausgeben. Unsere Funktion ist also $f(x_1)=x_1+3$.Die Hülle und Namen (PlusDrei) für unsere Funktion sind bereits im nächsten Kästchen gegeben.
+
+
+```{r Funktion, exercise=TRUE, exercise.preval=TRUE}
+PlusDrei <- function(x){
+  
+}
+
+PlusDrei(2)
+PlusDrei(99) + 4
+PlusDrei(x=99)
+```
+
+```{r Funktion-solution}
+PlusDrei <- function(x){
+  x+3
+}
+
+PlusDrei(2)
+PlusDrei(99) + 4
+PlusDrei(x=99)
+```
+
+Um die einzelnen Komponenten besser zu verstehen, verändere die Bestandteile der Funktion und führe nach jedem Schritt den Code aus.
+
+1. ändere den Buchstaben x (Variablenname), z.B. zu 'blau',
+2. den Namen PlusDrei, 
+3. die Rechnung innerhalb der Funktion,
+4. entferne die geschweiften Klammern
+
+```{r Funktion2, exercise=TRUE, exercise.preval=TRUE}
+PlusDrei <- function(x){
+  x+3
+}
+
+PlusDrei(2)
+PlusDrei(99)
+```
+
+```{r Funktion2-solution}
+PlusDreiOder <- function(blau)  blau*3 - 4
+
+PlusDreiOder(2)
+PlusDreiOder(99)
+```
+
+Ein wichtiger Hinweis zu x und blau in der letzten Aufgabe ist, dass diese Variablen jeweils nur in der Funktion definiert sind. Man kann innerhalb einer Funktion auch auf Objekte zugreifen, die außerhalb der Funktion gespeichert sind, das kann aber verwirrend sein.
+
+## Vektoren, Matrizen, data.frames
+
+Außer einzelnen Zahlen, können wir auch Vektoren, also mehrere Einträge auf einmal speichern. Das nächste Feld gibt dafür ein Beispiel. `c` ist eine Funktion, die Werte in einen Vektor kombiniert.
+
+```{r Vektoren, exercise=TRUE, exercise.preval=TRUE}
+ZahlenVektor <- c(4,4,6,1,4)
+text_vektor <- c("Haus","Baum","cfdvdf","3","Eins")
+
+ZahlenVektor
+text_vektor
+```
+
+Die beiden Vektoren stellen zwei übliche Namenskonventionen dar, also Wörter per Unterstrich getrennt oder mit Großbuchstaben markiert. Namen geben idealer Weise an, was das Objekt beinhaltet, z.B. KoerperGroesse, bip_nominal oder wie oben PlusDrei.
+
+Im letzten Kasten hatten wir einen numerischen und einen Zeichen (character) Vektor definiert. Es gibt in R neben diesen beiden noch zwei weiter häufige Datentypen: Faktoren und wahr/falsch-Einträge. Diese Typen betrachten wir ein anderes Mal.
+
+### data.frames
+
+Der Einfachheit wegen werden Vektoren dann meist in Listen gesammelt. Eine besondere Form der Listen und wohl die häufigste Datenform in R ist ein data.frame, also Datenrahmen. Ein Datenrahmen ist eine Liste gleich langer Spaltenvektoren. Das ist praktisch, wenn z.B. jede Zeile eine Beobachtung darstellt und jede Spalte eine Ausprägung (Variable). Ein Beispiel ist im nächsten Kasten gegeben.
+
+```{r datenRahmen, exercise=TRUE, exercise.preval=TRUE}
+Nummernschild <- c("DO KL 345","DO EE 3","DO LL 1234","BO G 2323")
+Automarke <- c("Kia","Toyota","Honda","Kia")
+Farbe <- c("blau","gruen","gelb","grau")
+Anzahl_Raeder <- c(4,4,4,4)
+
+Autos_Parkplatz <- data.frame(Nummernschild,Automarke,Farbe,Anzahl_Raeder)
+Autos_Parkplatz
+
+```
+
+Ein data.frame sieht also wie eine Tabelle oder Matrix aus. Wir können wie folgt auf Teilmengen und einzelne Elemente zugreifen. `Autoparkplatz[i,j]` gibt uns die i-te Zeile und j-te Spalte.
+
+```{r datenRahmenTeil, exercise=TRUE, exercise.preval=TRUE}
+Autos_Parkplatz <- data.frame(Nummernschild = c("DO KL 345","DO EE 3","DO LL 1234","BO G 2323"),
+                              Automarke = c("Kia","Toyota","Honda","Kia"),
+                              Farbe = c("blau","gruen","gelb","grau"),
+                              Anzahl_Raeder = c(4,4,4,4))
+Autos_Parkplatz[1,1]
+Autos_Parkplatz[,3]
+Autos_Parkplatz[c(1,4),]
+
+```
+
+Speicher nun alle Kias in einem neuen Datensatz indem du die Klammer nach Autos_Parkplatz ausfuellst.
+
+```{r Kia, exercise=TRUE, exercise.preval=TRUE}
+Autos_Parkplatz <- data.frame(Nummernschild = c("DO KL 345","DO EE 3","DO LL 1234","BO G 2323"),
+                              Automarke = c("Kia","Toyota","Honda","Kia"),
+                              Farbe = c("blau","gruen","gelb","grau"),
+                              Anzahl_Raeder = c(4,4,4,4))
+
+Kias <- Autos_Parkplatz[,]
+
+
+```
+
+```{r Kia-solution}
+Autos_Parkplatz <- data.frame(Nummernschild = c("DO KL 345","DO EE 3","DO LL 1234","BO G 2323"),
+                              Automarke = c("Kia","Toyota","Honda","Kia"),
+                              Farbe = c("blau","gruen","gelb","grau"),
+                              Anzahl_Raeder = c(4,4,4,4))
+
+# folgende Moeglichkeiten geben das gleiche Ergebnis
+Kias <- Autos_Parkplatz[c(1,4),]
+Kias <- Autos_Parkplatz[c(-2,-3),]
+Kias <- Autos_Parkplatz[-(2:3),]
+Kias <- Autos_Parkplatz[Autos_Parkplatz$Automarke=="Kia",]
+Kias <- Autos_Parkplatz[Autos_Parkplatz$Automarke%in%"Kia",]
+Kias
+```
+
+
