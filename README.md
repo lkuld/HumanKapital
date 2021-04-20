@@ -14,16 +14,17 @@ install.packages("learnr")
 devtools::install_github("lkuld/HumanKapital")
 ```
 
-## Beispiel
+## Beispiele
 
 
 ``` r
 library(HumanKapital)
+library(learnr)
 
 ## um die verfuegbaren Tutorien zu sehen
 available_tutorials("HumanKapital")
 
 ## um ein Tutorium "Beispiel" zu beginnen
-run_tutorials("Beispiel", "HumanKapital")
+run_tutorials("Tutorial_1_Grundlagen", "HumanKapital")
 ```
 
