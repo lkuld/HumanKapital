@@ -24,7 +24,7 @@ library(learnr)
 ## um die verfuegbaren Tutorien zu sehen
 available_tutorials("HumanKapital")
 
-## um ein Tutorium "Beispiel" zu beginnen
+## um das Tutorium "Tutorial_1_Grundlage" zu beginnen
 run_tutorials("Tutorial_1_Grundlagen", "HumanKapital")
 ```
 
