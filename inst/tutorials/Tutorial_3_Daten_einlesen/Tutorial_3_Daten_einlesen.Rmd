@@ -6,7 +6,7 @@ runtime: shiny_prerendered
 
 ```{r setup, include=FALSE}
 library(learnr)
-library(EmpStand)
+library(HumanKapital)
 library(reshape2)
 library(stringr)
 knitr::opts_chunk$set(echo = FALSE)
@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 Daten sind gesammelte Informationen.  Für eine Analyse müssen diese in ein verwertbares Format gebracht werden. Ein Standardformat für statistische Analysen ist eine Tabelle in der die Reihen Beobachtungen verschiedener Variablen, der Spalten, sind. Jede Spalte ist also eine Variable, z.B. ein Name oder das Gewicht der Beobachtung.
 
-Unser erster Datensatz ist eine Tabelle mit Stadtgrößen zwischen 800 und 1850 zuerst beschrieben in "La Population Des Villes Europeennes" (Bairoch, Batou, Chevre 1988). Der Datensatz ist im Paket EmpStand integriert. Wie wir Daten von anderen Quellen einlesen können, sehen wir uns später an. Der Name des Datensatzes ist `Bairoch_1988`. Gib dir den Datensatz im nächsten Kästchen aus. 
+Unser erster Datensatz ist eine Tabelle mit Stadtgrößen zwischen 800 und 1850 zuerst beschrieben in "La Population Des Villes Europeennes" (Bairoch, Batou, Chevre 1988). Der Datensatz ist im Paket HumanKapital integriert. Wie wir Daten von anderen Quellen einlesen können, sehen wir uns später an. Der Name des Datensatzes ist `Bairoch_1988`. Gib dir den Datensatz im nächsten Kästchen aus. 
 
 
 ```{r DatenAnschauen, exercise=TRUE}
