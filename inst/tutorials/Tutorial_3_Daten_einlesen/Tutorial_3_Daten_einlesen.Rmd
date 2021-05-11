@@ -1,0 +1,227 @@
+---
+title: "Teil 3: Daten einlesen"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(HumanKapital)
+library(reshape2)
+library(stringr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+##  Datensätze in R
+
+Daten sind gesammelte Informationen.  Für eine Analyse müssen diese in ein verwertbares Format gebracht werden. Ein Standardformat für statistische Analysen ist eine Tabelle in der die Reihen Beobachtungen verschiedener Variablen, der Spalten, sind. Jede Spalte ist also eine Variable, z.B. ein Name oder das Gewicht der Beobachtung.
+
+Unser erster Datensatz ist eine Tabelle mit Stadtgrößen zwischen 800 und 1850 zuerst beschrieben in "La Population Des Villes Europeennes" (Bairoch, Batou, Chevre 1988). Der Datensatz ist im Paket HumanKapital integriert. Wie wir Daten von anderen Quellen einlesen können, sehen wir uns später an. Der Name des Datensatzes ist `Bairoch_1988`. Gib dir den Datensatz im nächsten Kästchen aus. 
+
+
+```{r DatenAnschauen, exercise=TRUE}
+
+```
+
+Der Datensatz besteht also aus zwei Variablen, die Land und Stadt angeben, um die Beobachtung zu identifizieren und aus 12 Variablen die Stadtgrößen in verschiedenen Jahren zeigt. Da R keine Zahlen zu Beginn von Variablennamen erlaubt, hat jedes Jahr zusätzlich ein X zu beginn.
+
+Was auffällt sind die vielen `NA` Beobachtungen. Das steht für _Not Available_, also für einen fehlenden Wert in dieser Zelle. Ursache kann auch ein unsinniger Datentyp sein,  z.B. eine numerisches Wort (vergleiche `as.numeric("rot")` mit `as.numeric("3")`im obigen Kasten).
+
+
+Wie groß ist unser Datensatz? Probiere es mit `length(Bairoch_1988)`. Das Ergebnis zeigt, dass der Datensatz eine Kombination von 14 Variablen ist. Alle haben die gleiche Länge, aber können unterschiedliche Typen (Text, Zahlen, ...) haben. Das Format ist das R Standardformat: ein `data.frame`. Ein `data.frame` ist eine Liste wie `list`, bei der aber alle Elemente Vektoren der selben Länge sind.
+
+Die Anzahl der Zeilen/Reihen bekommen wir per `nrow(Bairoch_1988)`. Die Namen der Listenelemente (hier Variablen/Spalten) per `names(Bairoch_1988)`. `summary(Bairoch_1988)` gibt einen Überblick für alle Variablen. Einen schnellen Überblick verschafft auch `head(Bairoch_1988)` mit den obersten Zeilen.
+
+```{r Laenge, exercise=TRUE}
+
+```
+
+<br>
+
+Als nächstes wollen wir auf einzelne Reihen und Spalten zugreifen. Das geht per Zahl oder Name: `data.frame[Zeile,Spalte]` also `Bairoch_1988[1:4,c(2,4)]` oder `Bairoch_1988[1:4,c("city","X900")]`. Beachte, dass wir auf einzelne Variablen per `Bairoch_1988[,"city"]` oder `Bairoch_1988$city` zugreifen können. Bairoch_1988["city"] ergibt stattdessen ein `data.frame` mit einer Spalte (Unterschied ist Komma).
+
+```{r Teile, exercise=TRUE}
+
+```
+
+
+Häufig wollen wir auf eine bestimmte Teilmenge zugreifen. Z.B. alle Städte in Deutschland. Dafür definieren wir eine Bedingung, die uns einen Vektor von `TRUE` und `FALSE` Einträgen gibt. 
+
+
+```{r wahr, exercise=TRUE}
+
+farben <- c("rot", "blau", "rot", "gelb") # erstellt einen (Zeichen-)Vektor mit vier 'string' Eintraegen
+farben # gibt farben aus
+farben == "rot" #gibt einen Vektor der fuer jedes Element in farben angibt ob dieses gleich 'rot' ist. Dieser Vektor hat daher dieselbe Laenge wie farben
+farben %in% c("rot", "blau") #gibt einen Vektor der fuer jedes Element in farben angibt ob dieses gleich 'rot' oder 'blau' ist. Dieser Vektor hat daher dieselbe Laenge wie farben
+
+farben[farben == "rot"] # Gibt alle Elemente aus farben aus, fuer die der durch 'farben == "rot"' erstellte Vektor den Wert TRUE hat
+farben[farben != "gelb"] 
+farben[!farben %in% c("gelb")] 
+```
+
+Oder für die Städte in Frankreich:
+
+```{r wahr2, exercise=TRUE}
+
+
+Bairoch_1988$country == "France" # gibt einen Vektor der fuer jedes Element in Bairoch_1988$country angibt ob dieses France ist.
+Bairoch_1988$city[Bairoch_1988$country == "France"]
+```
+
+Gib im nächsten Kasten alle Beobachtungen aus Deutschland in Bairoch_1988 aus.
+
+
+```{r Deutschland, exercise=TRUE}
+
+
+```
+
+```{r Deutschland-solution}
+
+Bairoch_1988[Bairoch_1988$country == "Germany",]
+```
+
+
+
+##  Variablen manipulieren
+
+Wir werden jetzt Variablen miteinander verrechnen. Wir möchten die Stadtgrößen in 1850 in hunderttausend statt wie bisher in tausend Einwohnern ausdrücken Die neue Variable soll `Jahr_1850_hunderttausend` heißen.
+
+```{r hunderttausend, exercise=TRUE}
+
+
+```
+
+```{r hunderttausend-solution}
+Bairoch_1988$Jahr_1850_hunderttausend <- Bairoch_1988$X1850 / 100
+
+```
+
+
+Die nächste Variable soll jeden Wert in 1850 als Prozent der Gesamtmenge anzeigen. Die neue Variable soll `Jahr_1850_prozent` heißen.
+
+```{r prozent, exercise=TRUE}
+
+
+```
+
+```{r prozent-solution}
+Bairoch_1988$Jahr_1850_hunderttausend <- (Bairoch_1988$X1850 / sum(Bairoch_1988$X1850, na.rm = TRUE))*100
+
+```
+
+Nun wollen wir die Bevölkerungsdifferenz zwischen 1850 und 1800 berechnen und zwar absolut und prozentual.
+
+```{r Wachstum, exercise=TRUE}
+
+
+```
+
+```{r Wachstum-solution}
+Bairoch_1988$Wachstum_1800_1850 <- Bairoch_1988$X1850 - Bairoch_1988$X1800
+
+Bairoch_1988$Wachstum_1800_1850_prozentual <- 100*(Bairoch_1988$X1850 - Bairoch_1988$X1800)/Bairoch_1988$X1800
+```
+
+
+
+
+##  Format  ändern
+
+Als nächstes ändern wir das Datenformat. Statt mehrerer Jahresvariablen, wollen wir Jahr als Variable haben. Dafür nutzten wir die Funktion `melt()` aus dem Paket `reshape2`, das ich in dieses Tutorial eingebunden habe. Also weniger Variablen, dafür mehr Reihen. Diese Format wird daher auch `long` genannt. Wir behalten `country` und `city` zur Identifikation.
+
+```{r melt, exercise=TRUE}
+Bairoch_long <- melt(Bairoch_1988, id.vars = c("country","city"))
+Bairoch_long
+```
+
+Nun wollen wir die Daten aufaggregieren und zwar die Summe der Stadtbevölkerung per Land und Jahr. Wir nutzen die Funktion `aggregate(formula, data, FUN, ...,  subset, na.action = na.omit)`. `data` ist unser Datensatz, `FUN` ist dann `sum`, subset brauchen wir nicht. `formula` hat das Format `zu verändernde Variable ~ Klassifikaiontsvariable1 + Klassifikaiontsvariable2`.
+
+```{r agg, exercise=TRUE}
+Bairoch_long <- melt(Bairoch_1988, id.vars = c("country","city"))
+names(Bairoch_long)
+
+Bairoch_agg <- aggregate(value ~ country + variable , data=Bairoch_long, FUN = sum)
+Bairoch_agg
+```
+
+
+## Textvariablen manipulieren
+
+Um Textvariablen ( _character_ oder _string_ ) zu manipulieren, benutzen wir das Paket `stringr`. Wie `reshape2` ist auch dieses Paket bereits eingebunden. Bei deiner eigenen Arbeit musst du es per `library(stringr)` laden.
+
+Unsere erste Funktion ist `str_remove(string, pattern)`. Damit können wir ein Muster (`pattern`) in einer Zeichenfolge (`string`) entfernen. Wir wollen damit die X in `Bairoch_long$variable` entfernen.
+
+```{r Xweg, exercise=TRUE}
+Bairoch_long <- melt(Bairoch_1988, id.vars = c("country","city"))
+
+Bairoch_long$year <- str_remove(Bairoch_long$variable, "X")
+
+Bairoch_long$year 
+```
+
+Umgekehrt, könnten wir auch direkt die Jahreszahl extrahieren. Das ist es etwas komplizierter, da diese Zahlen unterschiedlich sind, d.h. wir müssen verschiedene Werte zulassen. Dazu benutzten wir eine _regular expression_. Diese _regular expressions_ sind eine standardisierte Form auf Zeichen zuzugreifen, wird also so auch in anderen Programmiersprachen verwendet. `"e.n$""` würde z.B. auf alle Kombinationen zutreffen, die erstens am Ende eines _strings_ stehen, da `$` das Ende des Strings bedeutet. Zweites, aus e, dann einem beliebigen Zeichen und n bestehen, da der Punkt `.` alle Zeichen ‚matcht‘. Wir würden also z.B. in "Farbein", die letzten drei Buchstaben 'matchen'.  Ein guter Überblick über _regular expressions_ bietet die Website https://www.regular-expressions.info/.
+
+Für unser Beispiel können wir die Funktion `str_extract` mit der _regular expression_ `"[0-9]+"` nutzen. Eckige Klammern erlauben alles in ihnen steht als Element. Z.B. matcht "[BS]aum" die Wörter Baum und Saum. Der Bindestrich greift auf eine gegebene Ordnung der Zeichen zurück, hier z.B. [0-9] ist das gleiche wie [0123456789]. [m-o] wäre [mno]. Eine geschweifte Klammer mit Zahl (z.B. `{4}`) bedeutet, dass das vorangehende Element so oft erscheinen muss. [0-9]{4} würde also vier Zahlen matchen. In unserem Beispiel haben wir aber Jahreszahlen mit drei und mit vier Stellen. Deswegen suchen wir genereller nach Zahlen ([0-9]), die mindestens einmal, aber beliebig oft vorkommen per `+`.
+
+Versuche im nächsten Kasten das obige Ergebnis mit `str_extract` zu erzielen.
+
+```{r extrac, exercise=TRUE}
+Bairoch_long <- melt(Bairoch_1988, id.vars = c("country","city"))
+
+
+```
+
+```{r extrac-solution}
+Bairoch_long <- melt(Bairoch_1988, id.vars = c("country","city"))
+
+Bairoch_long$year <- str_extract(Bairoch_long$variable, "[0-9]+")
+
+Bairoch_long$year[1:10]
+```
+
+Die Anführungszeichen um die Jahre bedeuten, dass die Zahlen von R als Textvariable gesehen werden. Falls wir diese als Zahlen verwenden wollen, müssen wir das Format ändern. In diesem Fall geht das per `as.numeric`. Speicher im folgenden die Variable als numerisch ab.
+
+```{r numeric, exercise=TRUE}
+Bairoch_long <- melt(Bairoch_1988, id.vars = c("country","city"))
+
+Bairoch_long$year <- str_extract(Bairoch_long$variable, "[0-9]+")
+
+```
+
+```{r numeric-solution}
+Bairoch_long <- melt(Bairoch_1988, id.vars = c("country","city"))
+Bairoch_long$year <- str_extract(Bairoch_long$variable, "[0-9]+")
+
+Bairoch_long$year <- as.numeric(Bairoch_long$year)
+Bairoch_long$year 
+```
+
+
+Zahlenwerte können wir z.B. in einem Graph einzeichnen. Bei Text wüsste R nicht was die Koordinaten sind. Aggregiere die Summe der Städte in Deutschland pro Jahr und zeichne diese in einem Graph.
+
+```{r aggGer, exercise=TRUE}
+
+
+
+
+```
+
+```{r aggGer-solution}
+Bairoch_long <- melt(Bairoch_1988, id.vars = c("country","city"))
+Bairoch_long$year <- str_extract(Bairoch_long$variable, "[0-9]+")
+
+Bairoch_agg <- aggregate(value ~ country + year , data=Bairoch_long[Bairoch_long$country=="Germany",], FUN = sum)
+
+Bairoch_agg$year <- as.numeric(Bairoch_agg$year)
+
+plot(Bairoch_agg$year, Bairoch_agg$value)
+
+```
+
+
+Eine große Stärke von R sind Graphiken. Viele Medien (z.B. BBC) benutzten Graphiken direkt aus R, die mit relative wenig Aufwand produziert werden können. Diese Graphiken nutzten das Paket `ggplot2`. Das schauen wir uns im nächsten Tutorial an. 
+
+
