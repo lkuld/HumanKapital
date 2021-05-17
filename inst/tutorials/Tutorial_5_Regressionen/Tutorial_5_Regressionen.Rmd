@@ -1,0 +1,141 @@
+---
+title: "Teil 5: Lineare Regressionen"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(HumanKapital)
+library(ggplot2)
+library(reshape2)
+library(stringr)
+
+bairoch <- melt(Bairoch_1988, id.vars = c("country","city"))
+bairoch$year <- as.numeric(str_extract(bairoch$variable, "[0-9]+"))
+bairoch$population <- as.numeric(bairoch$value)
+bairoch$value <- NULL
+bairoch$variable <- NULL
+
+bairoch <- bairoch[!is.na(bairoch$population),]
+bairoch <- bairoch[bairoch$city%in%bairoch$city[bairoch$population%in%100:500&bairoch$year==1850] & bairoch$year>1100  ,]
+set.seed(1)
+bairoch$year2 <- bairoch$year + rnorm(nrow(bairoch), 0, 30)
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Lineare Funktionen schätzen
+
+***Ziel des Tutoriums ist es einen Einblick in Datenanalyse mit per linearen Regressionen und OLS zu geben. Eine lineare Regression ist die Schätzung einer linearen Funktion um Beobachtungen zu beschreiben. OLS oder Kleinste-Quadrate-Schätzung ist eine Schätzmethode bei der die Summe der quadrierten Abweichungen zwischen  beobachteten und geschätzten Werten minimiert wird. ***
+
+***Die folgenden Pakete sind bereits geladen: HumanKapital, stringr, reshape2 und ggplot2.***
+
+Schauen wir uns nochmal den Bairoch Datensatz zu Bevölkerungsgröße an. Anmerkung: Ich habe alle Beobachtungen ohne Bevölkerungsgröße, vor 1100 gelöscht und nur Städte behalten, die 1850 zwischen 100 000 und 500 000 Einwohner*innen hatten. Ich habe außerdem die Jahreszahlen leicht verfälscht, um die Analyse zu vereinfachen.
+
+```{r Daten, exercise=TRUE}
+
+head(bairoch) # Format habe ich geändert
+
+```
+
+Zunächst betrachten wir den Zusammenhang zwischen Jahr (leicht verändert) und Bevölkerungsgröße grafisch.
+
+```{r Abb2, exercise=TRUE}
+
+# Grafik definieren
+Abb <- ggplot(data = bairoch) +
+  geom_point(aes(x=year2, y=population))
+  
+# Grafik ausgeben
+Abb
+```
+
+Wir versuchen nun eine lineare Funktion wie die folgende zu schätzen, um den Zusammenhang zwischen Jahreszahl und Bevölkerungsgröße besser zu verstehen. 
+
+>Eine lineare Funktion hat die Form $y = f(x) = a + bx$, d.h $y$ steigt linear mit $x$ an (die Ableitung ist konstant $f'(x) = b$).
+
+```{r Abb3, exercise=TRUE}
+
+# Grafik definieren
+Abb <- ggplot(data = bairoch) +
+  geom_point(aes(x=year2, y=population)) +
+  geom_smooth(aes(x=year2, y=population), method=lm) 
+
+# Grafik ausgeben
+Abb
+```
+
+Hier haben wir die Funktion `geom_smooth` verwendet mit der Methode lm für *linear model*. Diese Funktion direkt zu schätzen ist einfach mithilfe von `lm()`. Die Formel folgt dem Muster `y ~ x` für $y=a+bx$, hier also:
+
+```{r reg1, exercise=TRUE}
+
+reg <- lm(population ~ year2, data = bairoch)
+  
+reg
+```
+
+Wir sehen also, dass unsere lineare Funktion $Bevölkerung = -262,9801 + 0,2124 \; Jahr$ lautet, d.h. jedes Jahr steigt die Bevölkerungszahl um 0,2124 (tausend). Der y-Achsenabschnitt (*intercept*) ist -262,9801.
+
+## OLS
+
+Wie wurde diese Gleichung geschätzt? Das Prinzip von OLS (*ordinary least squares* oder gewöhnliche Methode der kleinsten Quadrate) ist, dass die Summe der quadrierten Abweichungen zwischen geschätztem und tatsächlichem Wert minimiert wird. 
+
+Z.B. hat Birmingham 1850 233 tausend Einwohner (nennen wir jetzt $y_i=233$, mit $i$ als 1850 Birmingham). Die geschätzte Zahl für eine Stadt 1850 ist aber $-262,9801 + 0,2124 \times 1850 = 129.9599$ (nennen wir $\hat{y_i} = \hat{a}+\hat{b}x_i$). Die Abweichung beträgt also $233 - 129,9599 = 103,0401$ und im Quadrat dann $103,0401^2=10617,26$. 
+
+Wenn wir das für alle Beobachtungen durchgehen haben wir die Summe der quadrierten Abweichungen. Das schreibt man mit dem Summenzeichen $\sum$, als $\sum_{i=1}^n{(y_i-\hat{y_i})^2}=(y_1-\hat{y_1})^2 + (y_2-\hat{y_2})^2 + \ldots + (y_n-\hat{y_n})^2$ fuer alle $n$ Stadt-Jahr Kombinationen (jedes $i$ steht fuer eine Beobachtung, also hier eine Stadt in einem Jahr).
+
+Wir können jetzt $\hat{y_i}$ als $a+bx_i$ schreiben, um die Summe als eine Funktion von $a$ und $b$ auszudrücken.  $\sum_{i=1}^n{(y_i-\hat{y_i})^2} = \sum_{i=1}^n{(y_i-(a+bx_i))^2}=f(a,b)$. Diese Summe können wir minimieren ("ach a und b ableiten, null-setzten und Gleichungen lösen") und bekommen Schätzungen für $a$ und $b$, also $\hat{a}$ und $\hat{b}$ ($\overline{x}=\frac{1}{n}\sum_{i=1}^n{x_i}$, der Mittelwert). 
+
+- $\hat{b} = \frac{\sum_{i=1}^n{(x_i-\overline{x})(y_i-\overline{y})}}{\sum_{i=1}^n{(x_i-\overline{x})^2}}$
+- $\hat{a} = \overline{y} - \hat{b} \overline{x}$
+
+
+## Regressionsoutput
+
+Sehen wir uns nochmal unsere Regression an. Mit `summary()` bekommen wir mehr Details zu unserer Schätzung.  
+
+```{r reg2, exercise=TRUE}
+
+# Bevölkerungsgröße als lineare Funktion der Jahreszahl schätzen
+reg <- lm(population ~ year2, data = bairoch)
+  
+# Regressionsoutput ausgeben
+summary(reg)
+```
+
+Wir interessieren uns insbesondere für das Verhältnis der Koeffizienten ($a$ und $b$) zu den zugehörigen Standardfehlern. Wie andere Standardfehler sind diese eine Maß dafür, wie sich die Koeffizienten ändern könnten, falls die Daten nochmal aus derselben Verteilung gezogen werden (hier: alternative Welt, $\ldots$). Anders ausgedrückt: wie präzise die Schätzung ist. 
+
+Die letzte Spalte (p-Werte, $Pr(>|t|)$) gibt an, wie oft wir einen Koeffizienten soweit von null entfernt beobachten (z.B. mehr als 0,2124 oder weniger als - 0,2124 für year2), wenn der wahre Wert null ist, den angegebenen Standardfehler hat (0,01923) und einer t-Verteilung mir den angegebenen Freiheitsgraden folgt (ähnlich einer Normalverteilung falls wir nicht sehr wenige Beobachtungen haben). Anders ausgedrückt: Wie 'wahrscheinlich' ist es, dass unser Effekt größer (oder kleiner) null ist. Wichtig ist, dass alle Zahlen innerhalb des Models gelten, d.h. falls alle Annahmen korrekt sind, wie z.B. Unabhängigkeit der Beobachtungen.
+
+
+## Mehrere unabhängige Variablen
+
+In unserer Funktion $y=a+bx$ hatten wir eine Variable $y$ die wir modelliert haben, abhängig davon wie sich $x$, unsere unabhängige Variable, ändert, also $y=f(x)$. Als nächstes wollen wir $y$ als eine Funktion mehrerer Variablen modellieren, also $y=f(x_1,x_2,\ldots)$, unter der Beschränkung das f linear in allen Variablen ist: $y=f(x_1,x_2,\ldots)=a+b_1x_1+b_2x_2 + \ldots$
+
+Die Umsetzung in R ist einfach. $y=a+b_1x_1+b_2x_2 + \ldots$ wird $y \sim x_1 + x_2$. Um dies zu Illustrieren, simulieren wir den Quadratmeterpreis als eine Funktion der Jahreszahl und Bevölkerungsgröße, genauer: Quadratmeterpreis $= -20 + 0,01 \times \text{Jahr} + 0,05 \times \text{Bevölkerung}$  plus einer standardnormalverteilten Zufallsvariablen als Fehlerterm.
+
+```{r reg3, exercise=TRUE}
+#Zufallssequenz initialisieren 
+set.seed(1)
+
+# Quadratmeterpreis simulieren
+bairoch$qm <- -200 + 0.8*bairoch$year2 + 0.5*bairoch$population + rnorm(nrow(bairoch))
+
+# Quadratmeterpreis als lineare Funktion von Jahr und Bevölkerungsgröße schätzen
+reg <- lm(qm ~ population + year2, data = bairoch)
+  
+# Regressionsoutput ausgeben
+summary(reg)
+```
+
+Der Output zeigt, dass unsere Schätzung recht präzise ist. Der theoretische Wert aus der Simulation für 'population' war z.B. $0,5$, der geschätzte Wert ist $0,4997$ ($4.997e-01= 0,4997$). 
+
+Die Sterne geben an, ob die p-Werte ($Pr(>|t|)$) kleiner als 0,1, 0,05, 0,01 oder 0,001 sind. Es folgt, dass alle Koeffizienten bei einem Signifikanzniveau von 0,001 signifikant unterschiedlich zu null sind, d.h. positiv in diesem Fall.
+
+Ein Anstieg von population um eins (tausend Einwohner*innen mehr) erhöht den Quadratmeterpreis um 0,4997.
+Ein Anstieg von year2 um eins (ein Jahr später) erhöht den Quadratmeterpreis um 0,8007.
+
+
+

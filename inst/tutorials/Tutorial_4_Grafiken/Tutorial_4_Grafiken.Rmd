@@ -1,0 +1,196 @@
+---
+title: "Teil 4: Grafiken mit ggplot2"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(HumanKapital)
+library(ggplot2)
+library(stringr)
+library(reshape2)
+
+bairoch <- melt(Bairoch_1988, id.vars = c("country","city"))
+bairoch$year <- as.numeric(str_extract(bairoch$variable, "[0-9]+"))
+bairoch$population <- as.numeric(bairoch$value)
+bairoch$value <- NULL
+bairoch$variable <- NULL
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## ggplot2
+
+***Ziel des Tutorials ist es einen Einblick in Grafiken mit Hilfe des Pakets ggplots2 in R zu geben. Für mehr Tipps und Hintergrundwissen zu Grafiken allgemein, empfehle ich https://ggplot2-book.org. Für 'Kochrezepte' für Graphiken in R, empfehle ich https://r-graphics.org/.***
+
+***Die folgenden Pakete sind bereits geladen: HumanKapital, stringr und ggplot2.***
+
+ggplot2 (Prinzip basierend auf The Grammar of Graphics von Leland Wilkinson (1999), deswegen 'gg')  bietet eine riesige Anzahl Grafiken, z.B. Histogramme, Karten und scatterplots, um Datensätze zu veranschaulichen (statisch, also keine Animationen/Videos).
+
+Das Grundprinzip ist, dass wir nacheinander verschiedene _Layer_ definieren. Z.B. starten wir mit einem leeren Kasten, in den wir dann Linien und Punkte einzeichnen.
+
+Schauen wir uns nochmal den Bairoch Datensatz zu Bevölkerungsgröße an.
+
+```{r Daten, exercise=TRUE}
+
+head(bairoch) # Format habe ich für dieses Tutorium geändert
+
+```
+
+Wir wollen nun die Bevölkerungsentwicklung in Dortmund darstellen. Wir beginnen mit `ggplot`, um eine ggplot2 Umgebung zu kreieren. und fügen dann Punkte per `geom_point()` hinzu (Klammern sind wichtig).
+
+Achtung: stelle sicher, dass alle Variablen das richtige Format haben, also z.B. `numeric` für Zahlenvariablen wie Jahre oder Preise.
+
+```{r Dortmund, exercise=TRUE}
+
+DortmundBev <- ggplot(data = bairoch[bairoch$city=="Dortmund",]) +
+  geom_point(aes(x=year, y=population))
+  
+DortmundBev
+```
+
+Wie gesehen, habe ich x-Achse (Jahr) und y-Achse (Bevölkerung) innerhalb der `aes()` Funktion definiert. `aes` kreiert Grafiken anhand der Variablen. Das sehen wir uns weiter unten nochmal genauer an. Zunächst wollen wir noch Linien zwischen den Beobachtungen hinzufügen. Dazu können wir x- und y-Achse bereits in `ggplot()` definieren, falls wir sie für mehrere Layer benutzen möchten. Falls wir unsere Graphik ich nur als Objekt speichern, sondern auch direkt ausgeben möchten, können wir es in Klammern setzten.
+
+```{r Dortmund2, exercise=TRUE}
+
+(DortmundBev <- ggplot(bairoch[bairoch$city=="Dortmund",], aes(x=year, y=population)) +
+  geom_point() +
+  geom_line()
+)
+
+```
+
+
+### Gruppen
+
+Als nächstes wollen wir die Bevölkerungszahlen mehrerer Städte in eine Grafik einzeichnen, wir müssen R also mitteilen welche Zahlen zu welcher Stadt gehören.
+
+```{r group, exercise=TRUE}
+
+(DortmundBev <- ggplot(bairoch[bairoch$city %in% c("Dortmund","Essen","Augsburg"),], aes(x=year, y=population)) +
+  geom_point(aes(group=city)) +
+  geom_line(aes(group=city)) 
+)
+
+```
+
+Zusätzlich fehlt uns noch ein Unterscheidungsmerkmal, um die Städte unterscheiden zu können, z.B. Farbe, Punktsymbol oder Linientyp.
+
+```{r color, exercise=TRUE}
+
+(DortmundBev <- ggplot(bairoch[bairoch$city %in% c("Dortmund","Essen","Augsburg"),], aes(x=year, y=population)) +
+  geom_point(aes(color=city)) +
+  geom_line(aes(color=city)) 
+)
+
+```
+
+Wir können auch mehrere Merkmale benutze. 'Ästhetiken', die nicht von Variablen abhängig sein sollen, stehen außerhalb der `aes()` Funktion, hier jetzt z.B. `size` und `color` in der zweiten Grafik.
+
+```{r color2, exercise=TRUE}
+
+(DortmundBev <- ggplot(bairoch[bairoch$city %in% c("Dortmund","Essen","Augsburg"),], aes(x=year, y=population)) +
+  geom_point(aes(color=city, shape=city), size=3) +
+  geom_line(aes(color=city, linetype=city)) 
+)
+
+(DortmundBev <- ggplot(bairoch[bairoch$city %in% c("Dortmund","Essen","Augsburg"),], aes(x=year, y=population)) +
+  geom_point(aes( shape=city), size=3, color="red") +
+  geom_line(aes(linetype=city)) 
+)
+
+```
+
+Alternativ könnte man drei Grafiken mit gemeinsamen Skalen und ggfs. einer Legende erstellen.
+
+```{r facet, exercise=TRUE}
+
+(DortmundBev <- ggplot(bairoch[bairoch$city %in% c("Dortmund","Essen","Augsburg"),], aes(x=year, y=population)) +
+  geom_point() +
+  geom_line()  +
+  facet_wrap(~city)
+)
+
+```
+
+## Grafikparameter
+
+Als nächstes wollen wir die Grafik einfacher zu interpretieren und hübscher machen. Dazu fügen wir weitere Layer hinzu.
+
+```{r labs, exercise=TRUE}
+
+(DortmundBev <- ggplot(bairoch[bairoch$city %in% c("Dortmund","Essen","Augsburg"),], aes(x=year, y=population)) +
+  geom_point(aes(color=city, shape=city), size=3) +
+  geom_line(aes(color=city, linetype=city)) +
+  labs(x="Jahr", y="Bevölkerung in tsd.", color="", shape="", linetype="") +
+  theme(legend.position = "bottom")
+)
+
+```
+
+
+Es gibt hier wirklich unzählige unterschiedliche Funktionen und Ressourcen online. Suchen Sie sich z.B. die BBC Umgebung, um die ähnliche Grafiken zu erstellen, wie sie die BBC verwendet.
+
+Zur Illustration verwenden wir nun noch ein Paket, das viele Farbmöglichkeiten bietet, z.B. für rot-grün-Schwäche oder schwarz-weiß Druck. Außerdem verwenden wir ein schwarz weises Layout (`theme_bw`, Standard ggplot2), um beim Druck Farbe zu sparen und Lesbarkeit zu erhöhen.
+
+```{r vir, exercise=TRUE}
+
+library(viridis)
+
+(DortmundBev <- ggplot(bairoch[bairoch$city %in% c("Dortmund","Essen","Augsburg"),], aes(x=year, y=population)) +
+  geom_point(aes(color=city, shape=city), size=3) +
+  geom_line(aes(color=city, linetype=city)) +
+  labs(x="Jahr", y="Bevölkerung in tsd.", color="", shape="", linetype="") +
+  theme_bw() +
+  scale_color_viridis_d() +
+  theme(legend.position = "bottom") 
+)
+
+```
+
+Abschließend stellen wir alle Bevölkerungsgrößen in einem Histogramm dar. Sehen Sie sich https://r-graphics.org/ für weitere Grafiken an.
+
+```{r hist, exercise=TRUE}
+
+(DortmundBev <- ggplot(bairoch, aes(population)) +
+    geom_histogram()
+)
+
+```
+
+Wieso sieht man hier so wenig? Welche Parameter könnte man ändern, um die Grafik sinnvoller zu gestalten (`?geom_histogram`)? Oder ist das Grafikformat an sich schlecht gewählt? 
+
+
+## Schwierigkeiten
+
+Die wesentliche Herausforderung isr es, das richtige Grafikformat zu wählen und die Daten vorzubereiten. Sehen Sie sich online verschieden Vorschläge an, z.B. Bardiagramme, Linien, Punkte, wobei vielleicht häufig das einfachste Format das beste ist.
+
+Für die Vorbereitung des Datensatzes sind die Funktionen `aggregate` und `melt`(aus reshape2) sehr hilfreich. Diese wurden am Ende des letzten Tutoriums besprochen. 
+
+```{r agg, exercise=TRUE}
+
+bevAgg <- aggregate(population ~ country + year, data=bairoch[bairoch$country%in%c("France","Germany"),], FUN = sum)
+
+ggplot(bevAgg, aes(year, population)) +
+  geom_line(aes(color=country))
+
+
+```
+
+
+Verwenden Sie grundsätzlich Gruppierungsverfahren statt manuell Datensätze zu kombinieren, was langfristig weniger flexibel ist und Sie in den Möglichkeiten des Outputs stark einschränkt.
+
+Also z.B. NICHT:
+
+```{r neg, exercise=TRUE}
+
+bevAgg <- aggregate(population ~ country + year, data=bairoch[bairoch$country%in%c("France","Germany"),], FUN = sum)
+
+ggplot() +
+  geom_line(data=bevAgg[bevAgg=="France",], aes(year, population), color="red") +
+  geom_line(data=bevAgg[bevAgg=="Germany",], aes(year, population), color="blue")
+
+
+```
